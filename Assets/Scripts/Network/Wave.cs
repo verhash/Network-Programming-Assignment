@@ -16,7 +16,7 @@ public class Wave : NetworkBehaviour
 
     IEnumerator SelfDestruct()
     {
-        if (IsServer)
+        if (IsSpawned && IsServer)
         {
             yield return new WaitForSeconds(2f);
             NetworkObject.Despawn();
