@@ -14,6 +14,17 @@ public class Bullet : NetworkBehaviour
         if (!IsOwner) return;
         base.OnNetworkSpawn();
         GetComponent<Rigidbody2D>().velocity = this.transform.forward * bulletSpeed;
+
+        StartCoroutine(SelfDestruct());
+    }
+
+    IEnumerator SelfDestruct()
+    {
+        if (IsServer)
+        {
+            yield return new WaitForSeconds(2f);
+            NetworkObject.Despawn();
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

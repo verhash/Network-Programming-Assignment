@@ -1,18 +1,28 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class Chat : MonoBehaviour
+public class Chat : NetworkBehaviour 
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField] private GameObject wavePrefab;
+    [SerializeField] private Transform chatPoint;
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if (!IsOwner) return;
+
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            SpawnWaveServerRPC(chatPoint.position, chatPoint.rotation);
+        }
+    }
+
+    [ServerRpc]
+
+    private void SpawnWaveServerRPC(Vector2 position, Quaternion rotation)
+    {
+        GameObject wave = Instantiate(wavePrefab, chatPoint.transform.position, wavePrefab.transform.rotation);
+        wave.GetComponent<NetworkObject>().Spawn();
     }
 }
