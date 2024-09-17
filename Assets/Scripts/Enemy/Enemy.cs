@@ -33,14 +33,16 @@ public class Enemy : NetworkBehaviour
 
     private void UpdateTargetDirection()
     {
-        if (enemyAwareness.AwareOfPlayer)
+        if (enemyAwareness.awareOfPlayer)
         {
-            targetDirection = enemyAwareness.DirectionToPlayer;
+            targetDirection = enemyAwareness.directionToPlayer;
         }
         else
         {
             targetDirection = Vector2.zero;
         }
+
+        UpdateTargetDirectionClientRpc(targetDirection);
     }
 
     private void RotationTowardsTarget()
@@ -54,6 +56,18 @@ public class Enemy : NetworkBehaviour
         Quaternion rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
 
         UpdateRotationClientRpc(rotation);
+    }
+
+    private void SetVelocity()
+    {
+        if (targetDirection == Vector2.zero)
+        {
+            UpdateVelocityClientRpc(Vector2.zero);
+        }
+        else
+        {
+            UpdateVelocityClientRpc(transform.up * speed);
+        }
     }
 
     [ClientRpc]
@@ -70,15 +84,11 @@ public class Enemy : NetworkBehaviour
         rb.velocity = velocity;
     }
 
-    private void SetVelocity()
+    [ClientRpc]
+
+    private void UpdateTargetDirectionClientRpc(Vector2 direction)
     {
-        if (targetDirection == Vector2.zero)
-        {
-            UpdateVelocityClientRpc(Vector2.zero);
-        }
-        else
-        {
-            UpdateVelocityClientRpc(transform.up * speed);
-        }
+        targetDirection = direction;
     }
+
 }

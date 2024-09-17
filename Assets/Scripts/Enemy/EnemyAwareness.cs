@@ -6,9 +6,9 @@ using UnityEngine;
 
 public class EnemyAwareness : NetworkBehaviour
 {
-    public bool AwareOfPlayer { get; private set; }
+    public bool awareOfPlayer { get; private set; }
 
-    public Vector2 DirectionToPlayer { get; private set; }
+    public Vector2 directionToPlayer { get; private set; }
 
     [SerializeField] private float playerAwarnessDistance;
 
@@ -16,6 +16,11 @@ public class EnemyAwareness : NetworkBehaviour
 
     private void Start()
     {
+        if (!IsServer)
+        {
+            return;
+        }
+
         Invoke(nameof(FindPlayer), 1.0f);
     }
 
@@ -34,19 +39,34 @@ public class EnemyAwareness : NetworkBehaviour
 
     void Update()
     {
+        if (!IsServer)
+        { 
+            return; 
+        }
+
         if (player != null)
         {
             Vector2 enemyToPlayerVector = player.position - transform.position;
-            DirectionToPlayer = enemyToPlayerVector.normalized;
+            directionToPlayer = enemyToPlayerVector.normalized;
 
             if (enemyToPlayerVector.magnitude <= playerAwarnessDistance)
             {
-                AwareOfPlayer = true;
+                awareOfPlayer = true;
             }
             else
             {
-                AwareOfPlayer = false;
+                awareOfPlayer = false;
             }
+
+            UpdateAwarenessClientRpc(awareOfPlayer, directionToPlayer);
         }
+    }
+
+    [ClientRpc]
+
+    private void UpdateAwarenessClientRpc(bool awareOfPlayer, Vector2 directionToPlayer)
+    {
+        this.awareOfPlayer = awareOfPlayer;
+        this.directionToPlayer = directionToPlayer;
     }
 }
